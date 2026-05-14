@@ -110,6 +110,25 @@ describe('host Claude state guard ordering', () => {
     expect(fs.existsSync(path.join(FAKE_HOME, '.ssh'))).toBe(false);
   });
 
+  it('execCommand rejects inspect workspace nested under $TMPDIR (so the workspace-root deny is not silently bypassed)', async () => {
+    const ws = fs.mkdtempSync(path.join(FAKE_TMPDIR, 'inspect-ws-'));
+    const parsed = {
+      subcommand: 'exec' as const,
+      profile: 'inspect' as const,
+      workspace: ws,
+      stateDir: path.join(FAKE_HOME, 'inspect-state'),
+      unsafeOverrides: new Set<string>() as Set<any>,
+      disposable: false,
+      unattended: false,
+      dryRun: false,
+      userArgs: ['echo', 'hi'],
+    };
+    await expect(execCommand(parsed)).rejects.toThrow(/workspace/i);
+    // The inspect workspace-root deny is policy-level; ensure we never wrote a
+    // blocked.txt at the workspace root via the launcher path.
+    expect(fs.existsSync(path.join(ws, 'blocked.txt'))).toBe(false);
+  });
+
   it('runCommand --dry-run does not create the state directory on disk', async () => {
     const state = path.join(FAKE_HOME, 'custom-srt-state');
     const parsed = {

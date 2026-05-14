@@ -18,7 +18,7 @@ export async function renderCommand(parsed: ParsedCli): Promise<void> {
     tmpdir: os.tmpdir(),
     home: os.homedir(),
   });
-  validate(substituted, parsed.unsafeOverrides);
+  validate(substituted, parsed.unsafeOverrides, { workspace });
   const rendered = toRendered(substituted);
 
   process.stdout.write(JSON.stringify(rendered, null, 2) + '\n');

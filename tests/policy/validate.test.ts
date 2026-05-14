@@ -146,6 +146,75 @@ describe('validate', () => {
     ).toBe(true);
   });
 
+  it('rejects an inspect-shaped policy whose workspace is nested under a tmp allowWrite root', () => {
+    // Models inspect's allowWrite (which excludes <workspace>) plus a workspace
+    // rooted under /tmp. The recursive allowWrite over /tmp silently re-permits
+    // workspace-root writes, which the inspect profile is supposed to deny.
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: baseDenyRead,
+        allowRead: ['/tmp/my-inspect-ws'],
+        allowWrite: [
+          '/tmp/my-inspect-ws/test-output',
+          '/tmp/my-inspect-ws/reports',
+          '/tmp/my-inspect-ws/.cache',
+          '/tmp',
+        ],
+      },
+    };
+    let caught: unknown;
+    try {
+      validate(fragment, new Set(), { workspace: '/tmp/my-inspect-ws' });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(PolicyValidationError);
+    const violations = (caught as PolicyValidationError).violations;
+    expect(
+      violations.some(v =>
+        v.toLowerCase().includes('workspace') &&
+        v.includes('/tmp'),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not reject when workspace is not nested under any non-workspace allowWrite root', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: baseDenyRead,
+        allowRead: ['/home/u/repo'],
+        allowWrite: [
+          '/home/u/repo/test-output',
+          '/home/u/repo/reports',
+          '/home/u/repo/.cache',
+          '/tmp',
+        ],
+      },
+    };
+    expect(() =>
+      validate(fragment, new Set(), { workspace: '/home/u/repo' }),
+    ).not.toThrow();
+  });
+
+  it('does not reject when workspace itself is an allowWrite entry (non-inspect profile shape)', () => {
+    // For profiles like interactive/build/ios, <workspace> is in allowWrite by
+    // design — workspace-root writes are intentionally permitted, so nesting
+    // under /tmp must not be rejected.
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: baseDenyRead,
+        allowRead: ['/tmp/ws'],
+        allowWrite: ['/tmp/ws', '/tmp'],
+      },
+    };
+    expect(() =>
+      validate(fragment, new Set(), { workspace: '/tmp/ws' }),
+    ).not.toThrow();
+  });
+
   it('throws when a denyWrite path is nested inside an allowWrite root', () => {
     const fragment: PolicyFragment = {
       filesystem: {

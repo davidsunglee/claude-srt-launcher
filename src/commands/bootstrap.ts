@@ -42,7 +42,7 @@ export async function bootstrapCommand(parsed: ParsedCli): Promise<void> {
     tmpdir: os.tmpdir(),
     home: os.homedir(),
   });
-  validate(substituted, parsed.unsafeOverrides);
+  validate(substituted, parsed.unsafeOverrides, { workspace });
   const rendered = toRendered(substituted);
 
   await ensureClaudeStateDir(stateDir);

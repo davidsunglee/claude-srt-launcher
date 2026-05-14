@@ -36,7 +36,7 @@ export async function runCommand(parsed: ParsedCli): Promise<void> {
     tmpdir: os.tmpdir(),
     home: os.homedir(),
   });
-  validate(substituted, parsed.unsafeOverrides);
+  validate(substituted, parsed.unsafeOverrides, { workspace });
   const rendered = toRendered(substituted);
 
   if (parsed.dryRun) {

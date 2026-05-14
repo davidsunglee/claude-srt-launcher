@@ -14,7 +14,15 @@ function isDenied(deny: string[], targetPath: string): boolean {
   return deny.some(p => p === targetPath || isInside(p, targetPath));
 }
 
-export function validate(fragment: PolicyFragment, granted: Set<UnsafeOverride>): void {
+export interface ValidateOpts {
+  workspace?: string;
+}
+
+export function validate(
+  fragment: PolicyFragment,
+  granted: Set<UnsafeOverride>,
+  opts?: ValidateOpts,
+): void {
   const violations: string[] = [];
   const home = os.homedir();
   const denyRead = fragment.filesystem?.denyRead ?? [];
@@ -57,6 +65,24 @@ export function validate(fragment: PolicyFragment, granted: Set<UnsafeOverride>)
         violations.push(
           `allowWrite path "${allowed}" overlaps with denyWrite path "${denied}"`,
         );
+      }
+    }
+  }
+
+  if (opts?.workspace !== undefined) {
+    const workspace = path.resolve(opts.workspace);
+    const allowWritePaths = (fragment.filesystem?.allowWrite ?? []).map(p =>
+      path.resolve(p),
+    );
+    const workspaceIsAllowedWrite = allowWritePaths.some(p => p === workspace);
+    if (!workspaceIsAllowedWrite) {
+      for (const allowed of allowWritePaths) {
+        if (allowed !== workspace && isInside(allowed, workspace)) {
+          violations.push(
+            `workspace "${workspace}" is nested under allowWrite path "${allowed}", ` +
+              `which silently re-permits workspace-root writes that this profile is supposed to deny`,
+          );
+        }
       }
     }
   }

@@ -16,8 +16,14 @@ export function resolveClaudeStateDir(
 }
 
 export async function ensureClaudeStateDir(stateDir: string): Promise<void> {
+  const claudeDir = path.join(stateDir, '.claude');
   await fs.mkdir(stateDir, { recursive: true, mode: 0o700 });
-  await fs.mkdir(path.join(stateDir, '.claude'), { recursive: true, mode: 0o700 });
+  await fs.mkdir(claudeDir, { recursive: true, mode: 0o700 });
+  // mkdir only applies `mode` when it creates the directory. If the dirs
+  // already existed with permissive bits, tighten them explicitly so the
+  // launcher's 0700 invariant holds across re-runs.
+  await fs.chmod(stateDir, 0o700);
+  await fs.chmod(claudeDir, 0o700);
 }
 
 export function claudeConfigDirFor(stateDir: string): string {

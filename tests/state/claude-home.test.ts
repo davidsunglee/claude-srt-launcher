@@ -77,6 +77,20 @@ describe('claude-home', () => {
       const stats = await fs.stat(stateDir);
       expect(stats.isDirectory()).toBe(true);
     });
+
+    it('tightens an existing permissive state directory to mode 0700', async () => {
+      const stateDir = path.join(tmpDir, 'pre-existing-state');
+      const claudeDir = path.join(stateDir, '.claude');
+      await fs.mkdir(stateDir, { recursive: true });
+      await fs.mkdir(claudeDir, { recursive: true });
+      await fs.chmod(stateDir, 0o755);
+      await fs.chmod(claudeDir, 0o755);
+
+      await ensureClaudeStateDir(stateDir);
+
+      expect((await fs.stat(stateDir)).mode & 0o777).toBe(0o700);
+      expect((await fs.stat(claudeDir)).mode & 0o777).toBe(0o700);
+    });
   });
 
   describe('claudeConfigDirFor', () => {

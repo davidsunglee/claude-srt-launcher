@@ -27,10 +27,10 @@ Use `inspect` when you want Claude Code to read, analyze, or run tests against a
 - `~/.cache` — cache writes
 - `<claude-state>` — Claude state updates
 
-All other writes inside `<workspace>` are **denied**, *provided the workspace itself is not nested under another allow-write path*. A test runner or tool that writes to a path outside these allowed subpaths will fail with a permission error — this is intentional, not a bug. If your tooling writes elsewhere, either adjust the tool or use the `interactive` profile.
+All other writes inside `<workspace>` are **denied**. A test runner or tool that writes to a path outside these allowed subpaths will fail with a permission error — this is intentional, not a bug. If your tooling writes elsewhere, either adjust the tool or use the `interactive` profile.
 
-> **Operational caveat — workspace placement under `/tmp` / `$TMPDIR`:**
-> The allow-write list above includes `/tmp` and `$TMPDIR`. SRT's path checks are recursive, so if you point `--workspace` at a directory that lives *inside* `/tmp` or `$TMPDIR` (for example, anything created by `mktemp -d -t ...` on macOS, where `$TMPDIR` resolves to a path under `/var/folders/...`), the workspace root and all subpaths under it inherit write access via the temp allowance. The "writes outside `<workspace>/test-output`, `<workspace>/reports`, `<workspace>/.cache` are denied" guarantee only holds when the workspace is rooted outside `/tmp` and `$TMPDIR`. For inspect sessions where the workspace-root deny is load-bearing, use a workspace under your repo or another non-temp parent directory.
+> **Workspace placement under `/tmp` / `$TMPDIR` is rejected at launch.**
+> The allow-write list above includes `/tmp` and `$TMPDIR`. SRT's path checks are recursive, so a workspace rooted under either path would otherwise inherit write access through the temp allowance and silently lose the workspace-root deny. The launcher therefore validates the resolved workspace against every non-workspace `allowWrite` entry and refuses to start (with a `PolicyValidationError` naming the offending path) when the workspace is nested under one. If you see this error, point `--workspace` at a directory outside `/tmp` and `$TMPDIR` (for example, a path under your repo or home). The check is generic — it triggers for any profile that excludes the workspace root from `allowWrite`.
 
 ---
 
