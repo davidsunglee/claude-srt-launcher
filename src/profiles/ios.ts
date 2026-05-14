@@ -1,8 +1,10 @@
 import type { PolicyFragment } from './types.js';
+import { GITHUB_GIT_FETCH_DOMAINS } from './github-git.js';
 
 export const IOS_PROFILE: PolicyFragment = {
   network: {
     allowedDomains: [
+      ...GITHUB_GIT_FETCH_DOMAINS,
       'developer.apple.com',
       'xcode.apple.com',
       'swcdn.apple.com',
@@ -22,6 +24,8 @@ export const IOS_PROFILE: PolicyFragment = {
   },
   filesystem: {
     allowRead: [
+      '<workspace>',
+      '<claude-state>',
       '/Applications/Xcode.app',
       '/Library/Developer',
       '~/Library/Developer/Xcode',
@@ -33,12 +37,16 @@ export const IOS_PROFILE: PolicyFragment = {
       '/Library/Developer/CommandLineTools',
     ],
     allowWrite: [
+      '<workspace>',
+      '<claude-state>',
       '~/Library/Developer/Xcode/DerivedData',
       '~/Library/Developer/CoreSimulator/Devices',
       '~/Library/Caches/com.apple.dt.Xcode',
       '~/Library/Caches/org.swift.swiftpm',
       '~/Library/Caches/com.apple.iphonesimulator',
       '~/Library/Logs/CoreSimulator',
+      '/tmp',
+      '$TMPDIR',
     ],
     denyRead: [
       '~/Library/MobileDevice/Provisioning Profiles',

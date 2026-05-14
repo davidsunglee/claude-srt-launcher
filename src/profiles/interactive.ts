@@ -1,15 +1,10 @@
 import type { PolicyFragment } from './types.js';
+import { GITHUB_GIT_FETCH_DOMAINS } from './github-git.js';
 
 export const INTERACTIVE_PROFILE: PolicyFragment = {
   network: {
     allowedDomains: [
-      'github.com',
-      '*.github.com',
-      'api.github.com',
-      'raw.githubusercontent.com',
-      'objects.githubusercontent.com',
-      'codeload.github.com',
-      'lfs.github.com',
+      ...GITHUB_GIT_FETCH_DOMAINS,
       'registry.npmjs.org',
       'registry.yarnpkg.com',
       'pypi.org',
@@ -32,6 +27,8 @@ export const INTERACTIVE_PROFILE: PolicyFragment = {
       '<workspace>',
       '<claude-state>',
       '~/.npm',
+      '~/Library/pnpm',
+      '~/Library/Caches/pnpm',
       '~/.yarn',
       '~/.cache',
       '~/.cargo',
@@ -44,6 +41,8 @@ export const INTERACTIVE_PROFILE: PolicyFragment = {
       '<workspace>',
       '<claude-state>',
       '~/.npm',
+      '~/Library/pnpm',
+      '~/Library/Caches/pnpm',
       '~/.yarn',
       '~/.cache',
       '~/.cargo',

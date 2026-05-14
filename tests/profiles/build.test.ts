@@ -39,6 +39,30 @@ describe('build profile — default (no egress)', () => {
     const rendered = toRendered(substitute(profile, subs));
     expect(rendered.filesystem.allowWrite).toContain('/ws');
   });
+
+  it('includes ~/Library/pnpm in allowRead after substitution', () => {
+    const profile = getProfile('build');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowRead).toContain('/home/u/Library/pnpm');
+  });
+
+  it('includes ~/Library/Caches/pnpm in allowRead after substitution', () => {
+    const profile = getProfile('build');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowRead).toContain('/home/u/Library/Caches/pnpm');
+  });
+
+  it('does not include ~/Library/pnpm in allowWrite after substitution', () => {
+    const profile = getProfile('build');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowWrite).not.toContain('/home/u/Library/pnpm');
+  });
+
+  it('does not include ~/Library/Caches/pnpm in allowWrite after substitution', () => {
+    const profile = getProfile('build');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowWrite).not.toContain('/home/u/Library/Caches/pnpm');
+  });
 });
 
 describe('build profile — with egress', () => {

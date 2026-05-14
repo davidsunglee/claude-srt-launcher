@@ -9,7 +9,7 @@ import { compose } from '../policy/compose.js';
 const profileMap: Record<string, PolicyFragment> = {
   interactive: INTERACTIVE_PROFILE,
   inspect: INSPECT_PROFILE,
-  ios: compose([INTERACTIVE_PROFILE, IOS_PROFILE]),
+  ios: IOS_PROFILE,
 };
 
 export function getProfile(name: ProfileName, opts?: { withEgress?: boolean }): PolicyFragment {

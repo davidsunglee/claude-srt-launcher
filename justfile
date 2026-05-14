@@ -2,7 +2,7 @@ default:
     @just --list
 
 build-ts:
-    npm install --silent && npx tsc
+    pnpm install --silent && pnpm exec tsc
 
 interactive *ARGS: build-ts
     node dist/cli.js run --profile interactive {{ARGS}}
@@ -26,4 +26,4 @@ smoke: build-ts
     bash scripts/smoke-test.sh
 
 test:
-    npx vitest run
+    pnpm exec vitest run

@@ -24,6 +24,22 @@ This is a **workflow guardrail, not a security control.** The `.srt-disposable` 
 
 ---
 
+## Default filesystem stance
+
+**Allow read:**
+- `<workspace>` — your project directory
+- `<claude-state>` — isolated Claude configuration/state
+- `~/.npm`, `~/Library/pnpm`, `~/Library/Caches/pnpm`, `~/.cache` — package manager caches (read only)
+
+**Allow write:**
+- `<workspace>` — your project directory
+- `<claude-state>` — isolated Claude configuration/state
+- `/tmp`, `$TMPDIR` — temporary files
+
+Note that pnpm's macOS store/cache paths are read-only in this profile: builds should hydrate them in advance (e.g. via a pre-build step that ran under `interactive`) and consume them during the build without further writes.
+
+---
+
 ## Default network stance
 
 The build profile restricts network egress to the Claude service only. No GitHub, no npm, no PyPI — only the requests Claude Code itself makes to the Anthropic API.

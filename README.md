@@ -8,12 +8,14 @@ A standalone TypeScript/Node CLI that launches Claude Code under the [Anthropic 
 
 ## Install
 
+This project uses [pnpm](https://pnpm.io/) as its package manager. Install pnpm by any reasonable mechanism — for example `brew install pnpm`, or `npm install -g pnpm`.
+
 ```sh
 npm install -g @anthropic-ai/sandbox-runtime   # provides the `srt` binary
 git clone https://github.com/your-org/claude-srt-launcher
 cd claude-srt-launcher
-npm install
-npm run build
+pnpm install
+pnpm build
 ```
 
 ---
@@ -35,7 +37,7 @@ node dist/cli.js run --profile interactive
 | `interactive` | Day-to-day development with full package-manager access | GitHub + npm/PyPI/Cargo/Go/RubyGems/Maven/Docker domains | Yes | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | `host-claude-home`, `local-binding`, `all-unix-sockets` |
 | `build` | Unattended CI/CD in disposable workspaces | Claude service only (no GitHub/npm) | Yes | Yes (isolated `<claude-state>`) | Auto-injected only with `--unattended` + disposable workspace (rejected otherwise, even if passed) | `build-with-egress`, `non-disposable-workspace` |
 | `inspect` | Code review, verification, read-only test execution | `api.github.com`, `raw.githubusercontent.com`, `codeload.github.com` only | No (test-output/reports/.cache only) | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | None |
-| `ios` | iOS Simulator build/test workflows | Interactive domains + Apple developer CDN + Swift package registry | Yes (DerivedData, caches) | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | `ios-codesigning` |
+| `ios` | iOS Simulator build/test workflows | GitHub Git-fetch + Apple developer CDN + Swift package registry (no npm/Yarn/PyPI/Cargo/Go/RubyGems/Maven/Docker) | Yes (DerivedData, caches) | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | `ios-codesigning` |
 
 ### Per-profile documentation
 
@@ -54,7 +56,7 @@ Run `just bootstrap interactive` (replacing `interactive` with your chosen profi
 
 ## Smoke test
 
-Run `npm run smoke` (or `just smoke`) to execute the end-to-end smoke-test matrix in `scripts/smoke-test.sh`. Each check launches `claude-srt-launcher exec` against a real SRT-rendered policy and verifies the sandbox enforces the expected allow/deny outcome:
+Run `pnpm smoke` (or `just smoke`) to execute the end-to-end smoke-test matrix in `scripts/smoke-test.sh`. Each check launches `claude-srt-launcher exec` against a real SRT-rendered policy and verifies the sandbox enforces the expected allow/deny outcome:
 
 **Allow checks (interactive profile):**
 - workspace write + read inside the launched workspace

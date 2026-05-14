@@ -42,7 +42,7 @@ STATE=$(mktemp -d -t claude-srt-state.XXXXXX)
 # workspace lives under either of those roots, writes to the workspace root
 # are implicitly permitted and the "deny workspace-root write" check below
 # becomes vacuous. Place WS_INSPECT under the current working directory
-# (the repo root when invoked via `npm run smoke` / `just smoke`) so the
+# (the repo root when invoked via `pnpm smoke` / `just smoke`) so the
 # workspace root is not nested under any other allow-write path.
 SMOKE_PWD=$(pwd)
 case "$SMOKE_PWD" in

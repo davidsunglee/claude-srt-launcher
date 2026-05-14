@@ -47,7 +47,7 @@ Claude service access is always included. In addition, `interactive` allows the 
 **Allow read + write:**
 - `<workspace>` — your project directory
 - `<claude-state>` — isolated Claude configuration/state (not your host `~/.claude`)
-- `~/.npm`, `~/.yarn`, `~/.cache`, `~/.cargo` — package manager caches
+- `~/.npm`, `~/Library/pnpm`, `~/Library/Caches/pnpm`, `~/.yarn`, `~/.cache`, `~/.cargo` — package manager caches
 
 **Allow read only:**
 - `~/.rustup`, `~/.rbenv`, `~/.pyenv`, `~/go` — language toolchain directories

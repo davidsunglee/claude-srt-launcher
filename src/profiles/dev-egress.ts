@@ -1,11 +1,7 @@
+import { GITHUB_GIT_FETCH_DOMAINS } from './github-git.js';
+
 export const DEV_EGRESS_DOMAINS: string[] = [
-  'github.com',
-  '*.github.com',
-  'api.github.com',
-  'raw.githubusercontent.com',
-  'objects.githubusercontent.com',
-  'codeload.github.com',
-  'lfs.github.com',
+  ...GITHUB_GIT_FETCH_DOMAINS,
   'registry.npmjs.org',
   'registry.yarnpkg.com',
   'pypi.org',

@@ -71,4 +71,28 @@ describe('interactive profile', () => {
     const rendered = toRendered(substitute(profile, subs));
     expect(rendered.network.allowAllUnixSockets).toBe(false);
   });
+
+  it('includes ~/Library/pnpm in allowRead after substitution', () => {
+    const profile = getProfile('interactive');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowRead).toContain('/home/u/Library/pnpm');
+  });
+
+  it('includes ~/Library/Caches/pnpm in allowRead after substitution', () => {
+    const profile = getProfile('interactive');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowRead).toContain('/home/u/Library/Caches/pnpm');
+  });
+
+  it('includes ~/Library/pnpm in allowWrite after substitution', () => {
+    const profile = getProfile('interactive');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowWrite).toContain('/home/u/Library/pnpm');
+  });
+
+  it('includes ~/Library/Caches/pnpm in allowWrite after substitution', () => {
+    const profile = getProfile('interactive');
+    const rendered = toRendered(substitute(profile, subs));
+    expect(rendered.filesystem.allowWrite).toContain('/home/u/Library/Caches/pnpm');
+  });
 });

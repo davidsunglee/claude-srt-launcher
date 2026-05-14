@@ -17,7 +17,14 @@ import { composeProfileFor, type ParsedCli } from './compose.js';
 
 const BOOTSTRAP_FRAGMENT: PolicyFragment = {
   filesystem: {
-    allowWrite: ['<claude-state>', '~/.npm', '~/.cache', '~/.config/claude'],
+    allowWrite: [
+      '<claude-state>',
+      '~/.npm',
+      '~/Library/pnpm',
+      '~/Library/Caches/pnpm',
+      '~/.cache',
+      '~/.config/claude',
+    ],
   },
 };
 
