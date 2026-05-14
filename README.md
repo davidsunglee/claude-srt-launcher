@@ -73,7 +73,7 @@ Run `npm run smoke` (or `just smoke`) to execute the end-to-end smoke-test matri
 - write to `~/Documents/` (skipped if absent; also asserts no host artifact)
 
 **Deny checks (inspect profile):**
-- writes to the workspace root (only `<workspace>/test-output/`, `<workspace>/reports/`, and `<workspace>/.cache/` are allowed)
+- writes to the workspace root (only `<workspace>/test-output/`, `<workspace>/reports/`, and `<workspace>/.cache/` are allowed). Note: this guarantee only holds when the workspace is rooted outside `/tmp` and `$TMPDIR`, because the inspect profile also allows writes to those temp roots. The smoke test creates its inspect-mode workspace under the repository working directory for this reason — see [docs/profiles/inspect.md](docs/profiles/inspect.md) for the operational caveat.
 
 **Deny checks (build profile):**
 - network egress to `api.github.com` (build allows only Claude service domains by default)

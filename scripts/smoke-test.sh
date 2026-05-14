@@ -37,9 +37,27 @@ fail() {
 
 WS=$(mktemp -d -t claude-srt-smoke.XXXXXX)
 STATE=$(mktemp -d -t claude-srt-state.XXXXXX)
-export WS STATE
 
-trap 'rm -rf "$WS" "$STATE"' EXIT
+# The inspect profile allows writes to /tmp and $TMPDIR. If the inspect-mode
+# workspace lives under either of those roots, writes to the workspace root
+# are implicitly permitted and the "deny workspace-root write" check below
+# becomes vacuous. Place WS_INSPECT under the current working directory
+# (the repo root when invoked via `npm run smoke` / `just smoke`) so the
+# workspace root is not nested under any other allow-write path.
+SMOKE_PWD=$(pwd)
+case "$SMOKE_PWD" in
+    /tmp/*|/tmp|"${TMPDIR%/}"|"${TMPDIR%/}"/*)
+        echo "ERROR: smoke test must be run from a working directory outside /tmp and \$TMPDIR" >&2
+        echo "  current PWD: $SMOKE_PWD" >&2
+        echo "  TMPDIR:      ${TMPDIR:-<unset>}" >&2
+        exit 2
+        ;;
+esac
+WS_INSPECT=$(mktemp -d "${SMOKE_PWD}/claude-srt-inspect-smoke.XXXXXX")
+
+export WS STATE WS_INSPECT
+
+trap 'rm -rf "$WS" "$STATE" "$WS_INSPECT"' EXIT
 
 CLI="node dist/cli.js"
 
@@ -209,20 +227,23 @@ fi
 
 # ---------------------------------------------------------------------------
 # inspect profile checks
+#
+# Uses $WS_INSPECT (created outside /tmp/$TMPDIR) so the workspace root is
+# not nested under any allow-write path. See WS_INSPECT setup above.
 # ---------------------------------------------------------------------------
 run_inspect() {
-    $CLI exec --profile inspect --workspace "$WS" --state-dir "$STATE" -- "$@"
+    $CLI exec --profile inspect --workspace "$WS_INSPECT" --state-dir "$STATE" -- "$@"
 }
 
 # DENY check 10a: inspect blocks workspace-root write
-if run_inspect bash -c 'echo nope > "$WS/blocked.txt"' 2>/dev/null; then
+if run_inspect bash -c 'echo nope > "$WS_INSPECT/blocked.txt"' 2>/dev/null; then
     fail "deny (inspect): workspace-root write"
 else
     pass "deny (inspect): workspace-root write"
 fi
 
 # PASS check 10b: inspect allows write under test-output subdir
-if run_inspect bash -c 'mkdir -p "$WS/test-output" && echo ok > "$WS/test-output/result.txt"' 2>/dev/null; then
+if run_inspect bash -c 'mkdir -p "$WS_INSPECT/test-output" && echo ok > "$WS_INSPECT/test-output/result.txt"' 2>/dev/null; then
     pass "inspect: write to test-output subdir"
 else
     fail "inspect: write to test-output subdir"
