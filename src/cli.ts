@@ -7,6 +7,7 @@ import { renderCommand } from './commands/render.js';
 import { parseUnsafeOverrides } from './overrides/unsafe.js';
 import { PolicyValidationError } from './policy/validate.js';
 import { WorkspaceNotDisposableError } from './state/workspace.js';
+import { DangerousFlagNotAllowedError } from './runner/claude-args.js';
 import type { ProfileName } from './profiles/types.js';
 import type { ParsedCli } from './commands/compose.js';
 
@@ -134,7 +135,11 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  if (err instanceof PolicyValidationError || err instanceof WorkspaceNotDisposableError) {
+  if (
+    err instanceof PolicyValidationError ||
+    err instanceof WorkspaceNotDisposableError ||
+    err instanceof DangerousFlagNotAllowedError
+  ) {
     process.stderr.write(`${err.message}\n`);
     process.exit(2);
   }

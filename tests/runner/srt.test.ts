@@ -83,4 +83,64 @@ describe('buildClaudeArgs', () => {
       buildClaudeArgs({ profile: 'interactive', unattended: false, userArgs: [] }),
     ).toEqual(['claude']);
   });
+
+  it('rejects user-supplied --dangerously-skip-permissions for interactive profile', () => {
+    expect(() =>
+      buildClaudeArgs({
+        profile: 'interactive',
+        unattended: false,
+        userArgs: ['--dangerously-skip-permissions'],
+      }),
+    ).toThrow(/dangerously-skip-permissions/);
+  });
+
+  it('rejects user-supplied --dangerously-skip-permissions for inspect profile', () => {
+    expect(() =>
+      buildClaudeArgs({
+        profile: 'inspect',
+        unattended: false,
+        userArgs: ['--dangerously-skip-permissions'],
+      }),
+    ).toThrow(/dangerously-skip-permissions/);
+  });
+
+  it('rejects user-supplied --dangerously-skip-permissions for ios profile', () => {
+    expect(() =>
+      buildClaudeArgs({
+        profile: 'ios',
+        unattended: false,
+        userArgs: ['--dangerously-skip-permissions'],
+      }),
+    ).toThrow(/dangerously-skip-permissions/);
+  });
+
+  it('rejects user-supplied --dangerously-skip-permissions for build profile without --unattended', () => {
+    expect(() =>
+      buildClaudeArgs({
+        profile: 'build',
+        unattended: false,
+        userArgs: ['--dangerously-skip-permissions'],
+      }),
+    ).toThrow(/dangerously-skip-permissions/);
+  });
+
+  it('accepts user-supplied --dangerously-skip-permissions for build+unattended', () => {
+    expect(() =>
+      buildClaudeArgs({
+        profile: 'build',
+        unattended: true,
+        userArgs: ['--dangerously-skip-permissions'],
+      }),
+    ).not.toThrow();
+  });
+
+  it('canonicalizes to a single --dangerously-skip-permissions when build+unattended user also supplies the flag', () => {
+    expect(
+      buildClaudeArgs({
+        profile: 'build',
+        unattended: true,
+        userArgs: ['--dangerously-skip-permissions', '-p', 'do-thing'],
+      }),
+    ).toEqual(['claude', '--dangerously-skip-permissions', '-p', 'do-thing']);
+  });
 });

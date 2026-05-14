@@ -18,6 +18,12 @@ import { renderCommand } from './render.js';
 export async function runCommand(parsed: ParsedCli): Promise<void> {
   const workspace = resolveWorkspace(process.cwd(), parsed.workspace);
 
+  const claudeCommand = buildClaudeArgs({
+    profile: parsed.profile,
+    unattended: parsed.unattended,
+    userArgs: parsed.userArgs,
+  });
+
   if (parsed.profile === 'build') {
     assertDisposableWorkspace(workspace, {
       disposableFlag: parsed.disposable,
@@ -48,11 +54,7 @@ export async function runCommand(parsed: ParsedCli): Promise<void> {
   const settingsPath = await renderToTempfile(rendered);
   const result = await runSrt({
     settingsPath,
-    command: buildClaudeArgs({
-      profile: parsed.profile,
-      unattended: parsed.unattended,
-      userArgs: parsed.userArgs,
-    }),
+    command: claudeCommand,
     env: { ...process.env, CLAUDE_CONFIG_DIR: claudeState },
   });
   process.exit(result.exitCode ?? 1);

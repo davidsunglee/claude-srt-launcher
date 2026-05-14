@@ -32,10 +32,10 @@ node dist/cli.js run --profile interactive
 
 | Profile | Use case | Default network egress | Workspace writes | Isolated Claude state | `--dangerously-skip-permissions` | Notable unsafe overrides |
 |---|---|---|---|---|---|---|
-| `interactive` | Day-to-day development with full package-manager access | GitHub + npm/PyPI/Cargo/Go/RubyGems/Maven/Docker domains | Yes | Yes (isolated `<claude-state>`) | Allowed | `host-claude-home`, `local-binding`, `all-unix-sockets` |
-| `build` | Unattended CI/CD in disposable workspaces | Claude service only (no GitHub/npm) | Yes | Yes (isolated `<claude-state>`) | Only with `--unattended` + disposable workspace | `build-with-egress`, `non-disposable-workspace` |
-| `inspect` | Code review, verification, read-only test execution | `api.github.com`, `raw.githubusercontent.com`, `codeload.github.com` only | No (test-output/reports/.cache only) | Yes (isolated `<claude-state>`) | Not recommended | None |
-| `ios` | iOS Simulator build/test workflows | Interactive domains + Apple developer CDN + Swift package registry | Yes (DerivedData, caches) | Yes (isolated `<claude-state>`) | Allowed | `ios-codesigning` |
+| `interactive` | Day-to-day development with full package-manager access | GitHub + npm/PyPI/Cargo/Go/RubyGems/Maven/Docker domains | Yes | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | `host-claude-home`, `local-binding`, `all-unix-sockets` |
+| `build` | Unattended CI/CD in disposable workspaces | Claude service only (no GitHub/npm) | Yes | Yes (isolated `<claude-state>`) | Auto-injected only with `--unattended` + disposable workspace (rejected otherwise, even if passed) | `build-with-egress`, `non-disposable-workspace` |
+| `inspect` | Code review, verification, read-only test execution | `api.github.com`, `raw.githubusercontent.com`, `codeload.github.com` only | No (test-output/reports/.cache only) | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | None |
+| `ios` | iOS Simulator build/test workflows | Interactive domains + Apple developer CDN + Swift package registry | Yes (DerivedData, caches) | Yes (isolated `<claude-state>`) | Unavailable (rejected if passed) | `ios-codesigning` |
 
 ### Per-profile documentation
 

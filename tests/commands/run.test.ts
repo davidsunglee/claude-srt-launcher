@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { EventEmitter } from 'node:events';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+
+vi.mock('node:child_process');
 
 // Shared fake home for all tests in this file. Set before importing any
 // modules under test so os.homedir() (mocked below) returns it.
@@ -27,6 +30,9 @@ vi.mock('node:os', async () => {
 const { runCommand } = await import('../../src/commands/run.js');
 const { execCommand } = await import('../../src/commands/exec.js');
 const { bootstrapCommand } = await import('../../src/commands/bootstrap.js');
+const { DangerousFlagNotAllowedError } = await import('../../src/runner/claude-args.js');
+const { spawn } = await import('node:child_process');
+const mockSpawn = vi.mocked(spawn);
 
 describe('host Claude state guard ordering', () => {
   let exitSpy: ReturnType<typeof vi.spyOn>;
@@ -127,6 +133,20 @@ describe('host Claude state guard ordering', () => {
     // The inspect workspace-root deny is policy-level; ensure we never wrote a
     // blocked.txt at the workspace root via the launcher path.
     expect(fs.existsSync(path.join(ws, 'blocked.txt'))).toBe(false);
+  });
+
+  it('runCommand rejects user-supplied --dangerously-skip-permissions on interactive profile before spawning srt or creating state', async () => {
+    const state = path.join(FAKE_HOME, 'srt-state-iac');
+    const parsed = {
+      ...makeParsed('run', state),
+      workspace: FAKE_TMPDIR,
+      userArgs: ['--dangerously-skip-permissions'],
+    };
+    mockSpawn.mockClear();
+
+    await expect(runCommand(parsed)).rejects.toBeInstanceOf(DangerousFlagNotAllowedError);
+    expect(mockSpawn).not.toHaveBeenCalled();
+    expect(fs.existsSync(state)).toBe(false);
   });
 
   it('runCommand --dry-run does not create the state directory on disk', async () => {
