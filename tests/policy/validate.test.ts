@@ -14,7 +14,7 @@ describe('validate', () => {
   it('throws when allowLocalBinding is true without local-binding grant', () => {
     const fragment: PolicyFragment = {
       network: { allowLocalBinding: true },
-      filesystem: { denyRead: baseDenyRead },
+      filesystem: { denyRead: baseDenyRead, denyWrite: baseDenyRead },
     };
     let caught: unknown;
     try {
@@ -29,7 +29,7 @@ describe('validate', () => {
   it('does not throw when allowLocalBinding is true with local-binding grant', () => {
     const fragment: PolicyFragment = {
       network: { allowLocalBinding: true },
-      filesystem: { denyRead: baseDenyRead },
+      filesystem: { denyRead: baseDenyRead, denyWrite: baseDenyRead },
     };
     expect(() => validate(fragment, new Set(['local-binding']))).not.toThrow();
   });
@@ -46,5 +46,61 @@ describe('validate', () => {
     }
     expect(caught).toBeInstanceOf(PolicyValidationError);
     expect((caught as PolicyValidationError).violations.some(v => v.toLowerCase().includes('ssh'))).toBe(true);
+  });
+
+  it('throws when denyWrite is missing the ~/.ssh path', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: [path.join(home, '.claude')],
+      },
+    };
+    let caught: unknown;
+    try {
+      validate(fragment, new Set());
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(PolicyValidationError);
+    const violations = (caught as PolicyValidationError).violations;
+    expect(violations.some(v => v.toLowerCase().includes('denywrite') && v.toLowerCase().includes('ssh'))).toBe(true);
+  });
+
+  it('throws when denyWrite is missing the ~/.claude path and host-claude-home is not granted', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: [path.join(home, '.ssh')],
+      },
+    };
+    let caught: unknown;
+    try {
+      validate(fragment, new Set());
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(PolicyValidationError);
+    const violations = (caught as PolicyValidationError).violations;
+    expect(violations.some(v => v.toLowerCase().includes('denywrite') && v.includes('.claude'))).toBe(true);
+  });
+
+  it('does not throw when denyWrite is missing the ~/.claude path but host-claude-home is granted', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: [path.join(home, '.ssh')],
+        denyWrite: [path.join(home, '.ssh')],
+      },
+    };
+    expect(() => validate(fragment, new Set(['host-claude-home']))).not.toThrow();
+  });
+
+  it('does not throw when denyRead and denyWrite both include the required paths', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: baseDenyRead,
+      },
+    };
+    expect(() => validate(fragment, new Set())).not.toThrow();
   });
 });

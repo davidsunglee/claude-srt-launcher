@@ -1,4 +1,5 @@
 import * as os from 'node:os';
+import * as path from 'node:path';
 import { substitute } from '../policy/substitute.js';
 import { validate } from '../policy/validate.js';
 import { toRendered } from '../policy/render.js';
@@ -6,8 +7,8 @@ import { resolveClaudeStateDir, claudeConfigDirFor } from '../state/claude-home.
 import { composeProfileFor, type ParsedCli } from './compose.js';
 
 export async function renderCommand(parsed: ParsedCli): Promise<void> {
-  const workspace = parsed.workspace ?? process.cwd();
-  const stateDir = parsed.stateDir ?? resolveClaudeStateDir(parsed.profile);
+  const workspace = path.resolve(parsed.workspace ?? process.cwd());
+  const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
   const claudeState = claudeConfigDirFor(stateDir);
 
   const composed = composeProfileFor(parsed);

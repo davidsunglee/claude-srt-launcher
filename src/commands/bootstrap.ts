@@ -1,4 +1,5 @@
 import * as os from 'node:os';
+import * as path from 'node:path';
 import type { PolicyFragment } from '../profiles/types.js';
 import { compose } from '../policy/compose.js';
 import { substitute } from '../policy/substitute.js';
@@ -30,7 +31,7 @@ export async function bootstrapCommand(parsed: ParsedCli): Promise<void> {
     });
   }
 
-  const stateDir = parsed.stateDir ?? resolveClaudeStateDir(parsed.profile);
+  const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
   await ensureClaudeStateDir(stateDir);
   assertNotHostClaudeHome(stateDir, parsed.unsafeOverrides as Set<string>);
 

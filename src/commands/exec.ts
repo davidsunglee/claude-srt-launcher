@@ -1,4 +1,5 @@
 import * as os from 'node:os';
+import * as path from 'node:path';
 import { substitute } from '../policy/substitute.js';
 import { validate } from '../policy/validate.js';
 import { toRendered, renderToTempfile } from '../policy/render.js';
@@ -22,7 +23,7 @@ export async function execCommand(parsed: ParsedCli): Promise<void> {
     });
   }
 
-  const stateDir = parsed.stateDir ?? resolveClaudeStateDir(parsed.profile);
+  const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
   await ensureClaudeStateDir(stateDir);
   assertNotHostClaudeHome(stateDir, parsed.unsafeOverrides as Set<string>);
 

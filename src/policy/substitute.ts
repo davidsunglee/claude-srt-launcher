@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import type { PolicyFragment, Substitutions } from '../profiles/types.js';
 import { expandTilde, expandTmpdir } from '../util/paths.js';
 
@@ -11,6 +12,10 @@ function substituteStr(s: string, subs: Substitutions): string {
 
 function substituteArr(arr: string[] | undefined, subs: Substitutions): string[] | undefined {
   return arr?.map(s => substituteStr(s, subs));
+}
+
+function substitutePathArr(arr: string[] | undefined, subs: Substitutions): string[] | undefined {
+  return arr?.map(s => path.resolve(substituteStr(s, subs)));
 }
 
 export function substitute(fragment: PolicyFragment, subs: Substitutions): PolicyFragment {
@@ -28,10 +33,10 @@ export function substitute(fragment: PolicyFragment, subs: Substitutions): Polic
 
   if (fragment.filesystem !== undefined) {
     result.filesystem = {
-      denyRead: substituteArr(fragment.filesystem.denyRead, subs),
-      allowRead: substituteArr(fragment.filesystem.allowRead, subs),
-      allowWrite: substituteArr(fragment.filesystem.allowWrite, subs),
-      denyWrite: substituteArr(fragment.filesystem.denyWrite, subs),
+      denyRead: substitutePathArr(fragment.filesystem.denyRead, subs),
+      allowRead: substitutePathArr(fragment.filesystem.allowRead, subs),
+      allowWrite: substitutePathArr(fragment.filesystem.allowWrite, subs),
+      denyWrite: substitutePathArr(fragment.filesystem.denyWrite, subs),
     };
   }
 
