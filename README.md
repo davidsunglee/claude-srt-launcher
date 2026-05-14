@@ -54,12 +54,34 @@ Run `just bootstrap interactive` (replacing `interactive` with your chosen profi
 
 ## Smoke test
 
-Run `npm run smoke` (or `just smoke`) to execute the smoke-test suite:
+Run `npm run smoke` (or `just smoke`) to execute the end-to-end smoke-test matrix in `scripts/smoke-test.sh`. Each check launches `claude-srt-launcher exec` against a real SRT-rendered policy and verifies the sandbox enforces the expected allow/deny outcome:
 
-- **Profile rendering** — renders all four profiles and asserts the output is valid JSON with the expected top-level keys.
-- **Override parsing** — asserts that unknown override names are rejected and known names are accepted.
-- **Disposable check** — asserts that the build profile refuses to launch without `.srt-disposable` or `--disposable` unless `--unsafe=non-disposable-workspace` is passed.
-- **Network baseline** — asserts the inspect profile does not include npm or PyPI domains.
+**Allow checks (interactive profile):**
+- workspace write + read inside the launched workspace
+- network egress to `api.github.com`
+- inspect profile: write under `<workspace>/test-output/` subdir
+
+**Deny checks (interactive profile):**
+- read of `~/.ssh/known_hosts`
+- read of `~/.aws/credentials`
+- network egress to `https://malicious.invalid.example`
+- read of host `~/.claude`
+- Docker socket access at `/var/run/docker.sock` (skipped if no socket present)
+- OrbStack / colima socket access (skipped if neither socket present)
+- writes to `~/.ssh/`, `~/.aws/`, `~/.claude/` (asserts both that the sandbox rejects the write *and* that no host-side artifact is created)
+- read of `~/Documents` (skipped if absent)
+- write to `~/Documents/` (skipped if absent; also asserts no host artifact)
+
+**Deny checks (inspect profile):**
+- writes to the workspace root (only `<workspace>/test-output/`, `<workspace>/reports/`, and `<workspace>/.cache/` are allowed)
+
+**Deny checks (build profile):**
+- network egress to `api.github.com` (build allows only Claude service domains by default)
+
+**Wrapper sanity:**
+- `claude --version` runs under the wrapper, if `claude` is installed on PATH (otherwise skipped)
+
+The script prints `PASS:` / `FAIL:` / `SKIP:` per check and exits with the number of failures.
 
 ---
 

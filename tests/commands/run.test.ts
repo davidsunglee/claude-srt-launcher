@@ -5,14 +5,22 @@ import * as path from 'node:path';
 
 // Shared fake home for all tests in this file. Set before importing any
 // modules under test so os.homedir() (mocked below) returns it.
-const FAKE_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'srt-host-guard-'));
+// Use process.env.TMPDIR (or /tmp) rather than os.tmpdir() since the os
+// module is mocked below and the mock closes over these constants.
+const REAL_TMPDIR = process.env.TMPDIR ?? '/tmp';
+const FAKE_HOME = fs.mkdtempSync(path.join(REAL_TMPDIR, 'srt-host-guard-'));
+// Separate fake tmpdir so $TMPDIR substitutions in the policy don't end up
+// containing FAKE_HOME (which would force spurious allowWrite/denyWrite
+// overlap violations unrelated to the behavior under test).
+const FAKE_TMPDIR = fs.mkdtempSync(path.join(REAL_TMPDIR, 'srt-host-guard-tmp-'));
 
 vi.mock('node:os', async () => {
   const actual = await vi.importActual<typeof import('node:os')>('node:os');
   return {
     ...actual,
-    default: { ...actual, homedir: () => FAKE_HOME },
+    default: { ...actual, homedir: () => FAKE_HOME, tmpdir: () => FAKE_TMPDIR },
     homedir: () => FAKE_HOME,
+    tmpdir: () => FAKE_TMPDIR,
   };
 });
 
@@ -80,5 +88,46 @@ describe('host Claude state guard ordering', () => {
       /host-claude-home/,
     );
     expect(fs.existsSync(path.join(FAKE_HOME, '.claude'))).toBe(false);
+  });
+
+  it('runCommand rejects stateDir nested under ~/.ssh without creating any host artifact in ~/.ssh', async () => {
+    const sshState = path.join(FAKE_HOME, '.ssh', 'srt-state');
+    await expect(runCommand(makeParsed('run', sshState))).rejects.toThrow();
+    expect(fs.existsSync(path.join(FAKE_HOME, '.ssh'))).toBe(false);
+  });
+
+  it('execCommand rejects stateDir nested under ~/.aws without creating any host artifact in ~/.aws', async () => {
+    const awsState = path.join(FAKE_HOME, '.aws', 'srt-state');
+    await expect(execCommand(makeParsed('exec', awsState))).rejects.toThrow();
+    expect(fs.existsSync(path.join(FAKE_HOME, '.aws'))).toBe(false);
+  });
+
+  it('bootstrapCommand rejects stateDir nested under ~/.ssh without creating any host artifact in ~/.ssh', async () => {
+    const sshState = path.join(FAKE_HOME, '.ssh', 'srt-state');
+    await expect(
+      bootstrapCommand(makeParsed('bootstrap', sshState)),
+    ).rejects.toThrow();
+    expect(fs.existsSync(path.join(FAKE_HOME, '.ssh'))).toBe(false);
+  });
+
+  it('runCommand --dry-run does not create the state directory on disk', async () => {
+    const state = path.join(FAKE_HOME, 'custom-srt-state');
+    const parsed = {
+      ...makeParsed('run', state),
+      // Use the sibling FAKE_TMPDIR for workspace so its allowWrite entry
+      // does not overlap with FAKE_HOME/.{ssh,aws,...} denyWrite entries.
+      workspace: FAKE_TMPDIR,
+      dryRun: true,
+    };
+    // Swallow render-mode stdout
+    const stdoutSpy = vi
+      .spyOn(process.stdout, 'write')
+      .mockImplementation(((_chunk?: any) => true) as any);
+    try {
+      await runCommand(parsed);
+    } finally {
+      stdoutSpy.mockRestore();
+    }
+    expect(fs.existsSync(state)).toBe(false);
   });
 });

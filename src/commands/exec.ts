@@ -25,7 +25,6 @@ export async function execCommand(parsed: ParsedCli): Promise<void> {
 
   const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
   assertNotHostClaudeHome(stateDir, parsed.unsafeOverrides as Set<string>);
-  await ensureClaudeStateDir(stateDir);
 
   const composed = composeProfileFor(parsed);
   const claudeState = resolveClaudeConfigDir(stateDir, parsed.unsafeOverrides);
@@ -43,6 +42,7 @@ export async function execCommand(parsed: ParsedCli): Promise<void> {
     process.exit(2);
   }
 
+  await ensureClaudeStateDir(stateDir);
   const settingsPath = await renderToTempfile(rendered);
   const result = await runSrt({
     settingsPath,
