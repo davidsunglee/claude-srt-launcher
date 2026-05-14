@@ -5,6 +5,7 @@
 #
 #   PASS  1  workspace write + read         — interactive can write/read inside $WS
 #   PASS  2  network allow: GitHub          — interactive profile permits api.github.com
+#   PASS  3  network allow: Claude platform — interactive profile permits platform.claude.com
 #   DENY  1  SSH known_hosts read           — ~/.ssh/known_hosts is blocked
 #   DENY  2  AWS credentials read           — ~/.aws/credentials is blocked
 #   DENY  3  malicious domain network       — https://malicious.invalid.example is blocked
@@ -81,6 +82,15 @@ if run_interactive curl -fsS --max-time 8 -o /dev/null https://api.github.com 2>
     pass "network allow: api.github.com"
 else
     fail "network allow: api.github.com"
+fi
+
+# ---------------------------------------------------------------------------
+# PASS check 3: network allow — Claude Code platform reachable in interactive
+# ---------------------------------------------------------------------------
+if run_interactive curl -fsS --max-time 8 -o /dev/null https://platform.claude.com 2>/dev/null; then
+    pass "network allow: platform.claude.com"
+else
+    fail "network allow: platform.claude.com"
 fi
 
 # ---------------------------------------------------------------------------

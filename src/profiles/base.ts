@@ -28,6 +28,7 @@ export const BASE_POLICY: PolicyFragment = {
       'api.anthropic.com',
       'statsig.anthropic.com',
       'console.anthropic.com',
+      'platform.claude.com',
       'claude.ai',
       '*.claude.ai',
       'sentry.io',

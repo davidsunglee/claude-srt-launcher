@@ -21,4 +21,8 @@ describe('BASE_POLICY', () => {
   it('allows api.anthropic.com', () => {
     expect(BASE_POLICY.network?.allowedDomains?.includes('api.anthropic.com')).toBe(true);
   });
+
+  it('allows platform.claude.com for Claude Code service connections', () => {
+    expect(BASE_POLICY.network?.allowedDomains?.includes('platform.claude.com')).toBe(true);
+  });
 });

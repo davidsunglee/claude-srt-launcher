@@ -61,6 +61,7 @@ Run `pnpm smoke` (or `just smoke`) to execute the end-to-end smoke-test matrix i
 **Allow checks (interactive profile):**
 - workspace write + read inside the launched workspace
 - network egress to `api.github.com`
+- Claude Code service egress to `platform.claude.com`
 - inspect profile: write under `<workspace>/test-output/` subdir
 
 **Deny checks (interactive profile):**
