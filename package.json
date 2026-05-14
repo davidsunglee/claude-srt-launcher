@@ -1,0 +1,26 @@
+{
+  "name": "claude-srt-launcher",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "bin": {
+    "claude-srt": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "smoke": "bash scripts/smoke-test.sh",
+    "render": "node dist/cli.js render"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sandbox-runtime": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "@types/node": "^20.12.0"
+  }
+}
