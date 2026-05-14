@@ -15,8 +15,6 @@ export const INSPECT_PROFILE: PolicyFragment = {
       '~/.cache',
     ],
     allowWrite: [
-      '/tmp',
-      '$TMPDIR',
       '<workspace>/test-output',
       '<workspace>/reports',
       '<workspace>/.cache',

@@ -8,7 +8,7 @@ import { toRendered, renderToTempfile } from '../policy/render.js';
 import {
   resolveClaudeStateDir,
   ensureClaudeStateDir,
-  claudeConfigDirFor,
+  resolveClaudeConfigDir,
   assertNotHostClaudeHome,
 } from '../state/claude-home.js';
 import { resolveWorkspace, assertDisposableWorkspace } from '../state/workspace.js';
@@ -36,7 +36,7 @@ export async function bootstrapCommand(parsed: ParsedCli): Promise<void> {
   assertNotHostClaudeHome(stateDir, parsed.unsafeOverrides as Set<string>);
 
   const composed = compose([composeProfileFor(parsed), BOOTSTRAP_FRAGMENT]);
-  const claudeState = claudeConfigDirFor(stateDir);
+  const claudeState = resolveClaudeConfigDir(stateDir, parsed.unsafeOverrides);
   const substituted = substitute(composed, {
     workspace,
     claudeState,

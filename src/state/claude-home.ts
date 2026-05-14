@@ -24,6 +24,23 @@ export function claudeConfigDirFor(stateDir: string): string {
   return path.join(stateDir, '.claude');
 }
 
+/**
+ * Returns the directory that should be used as Claude's config home
+ * (i.e. the value substituted for <claude-state> and exported as
+ * CLAUDE_CONFIG_DIR). When the host-claude-home unsafe override is
+ * granted, this is the host ~/.claude directory; otherwise it is the
+ * isolated .claude subdirectory inside the per-profile state dir.
+ */
+export function resolveClaudeConfigDir(
+  stateDir: string,
+  granted: ReadonlySet<string>
+): string {
+  if (granted.has('host-claude-home')) {
+    return path.join(os.homedir(), '.claude');
+  }
+  return claudeConfigDirFor(stateDir);
+}
+
 export function assertNotHostClaudeHome(
   stateDir: string,
   granted: Set<string>

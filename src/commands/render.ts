@@ -3,13 +3,13 @@ import * as path from 'node:path';
 import { substitute } from '../policy/substitute.js';
 import { validate } from '../policy/validate.js';
 import { toRendered } from '../policy/render.js';
-import { resolveClaudeStateDir, claudeConfigDirFor } from '../state/claude-home.js';
+import { resolveClaudeStateDir, resolveClaudeConfigDir } from '../state/claude-home.js';
 import { composeProfileFor, type ParsedCli } from './compose.js';
 
 export async function renderCommand(parsed: ParsedCli): Promise<void> {
   const workspace = path.resolve(parsed.workspace ?? process.cwd());
   const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
-  const claudeState = claudeConfigDirFor(stateDir);
+  const claudeState = resolveClaudeConfigDir(stateDir, parsed.unsafeOverrides);
 
   const composed = composeProfileFor(parsed);
   const substituted = substitute(composed, {

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "smoke": "bash scripts/smoke-test.sh",
+    "smoke": "npm run build && bash scripts/smoke-test.sh",
     "render": "node dist/cli.js render"
   },
   "engines": {
