@@ -20,6 +20,8 @@ export const INSPECT_PROFILE: PolicyFragment = {
       '<workspace>/.cache',
       '~/.cache',
       '<claude-state>',
+      '/tmp',
+      '$TMPDIR',
     ],
   },
 };

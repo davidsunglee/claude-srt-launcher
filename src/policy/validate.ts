@@ -46,10 +46,18 @@ export function validate(fragment: PolicyFragment, granted: Set<UnsafeOverride>)
     }
   }
 
-  const allowWriteSet = new Set(fragment.filesystem?.allowWrite ?? []);
-  for (const p of fragment.filesystem?.denyWrite ?? []) {
-    if (allowWriteSet.has(p)) {
-      violations.push(`path appears in both allowWrite and denyWrite: ${p}`);
+  const allowWrites = fragment.filesystem?.allowWrite ?? [];
+  for (const denied of fragment.filesystem?.denyWrite ?? []) {
+    for (const allowed of allowWrites) {
+      if (
+        allowed === denied ||
+        isInside(denied, allowed) ||
+        isInside(allowed, denied)
+      ) {
+        violations.push(
+          `allowWrite path "${allowed}" overlaps with denyWrite path "${denied}"`,
+        );
+      }
     }
   }
 

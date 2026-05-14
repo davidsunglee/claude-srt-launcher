@@ -24,8 +24,8 @@ export async function execCommand(parsed: ParsedCli): Promise<void> {
   }
 
   const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
-  await ensureClaudeStateDir(stateDir);
   assertNotHostClaudeHome(stateDir, parsed.unsafeOverrides as Set<string>);
+  await ensureClaudeStateDir(stateDir);
 
   const composed = composeProfileFor(parsed);
   const claudeState = resolveClaudeConfigDir(stateDir, parsed.unsafeOverrides);

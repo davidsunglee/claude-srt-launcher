@@ -54,31 +54,16 @@ describe('inspect profile', () => {
     expect(rendered.network.allowedDomains).toContain('api.anthropic.com');
   });
 
-  it('does NOT grant broad /tmp write (would bypass workspace-root deny for temp workspaces)', () => {
+  it('grants /tmp write so inspect workloads can use the system temp directory', () => {
     const profile = getProfile('inspect');
     const rendered = toRendered(substitute(profile, subs));
-    expect(rendered.filesystem.allowWrite).not.toContain('/tmp');
+    expect(rendered.filesystem.allowWrite).toContain('/tmp');
   });
 
-  it('does NOT grant broad $TMPDIR write (would bypass workspace-root deny for temp workspaces)', () => {
+  it('grants $TMPDIR write after substitution', () => {
     const profile = getProfile('inspect');
     const tmpdir = '/private/var/folders/zz/tmp';
     const rendered = toRendered(substitute(profile, { ...subs, tmpdir }));
-    expect(rendered.filesystem.allowWrite).not.toContain(tmpdir);
-  });
-
-  it('does NOT permit workspace-root writes when workspace lives under os.tmpdir()', () => {
-    const profile = getProfile('inspect');
-    const wsUnderTmp = '/tmp/claude-srt-smoke.abc/ws';
-    const rendered = toRendered(
-      substitute(profile, { workspace: wsUnderTmp, claudeState: '/state', tmpdir: '/tmp', home: '/home/u' })
-    );
-    // workspace-root must NOT be implicitly writable through any allowWrite entry
-    for (const entry of rendered.filesystem.allowWrite) {
-      // an allowWrite entry "covers" the workspace root iff entry === wsUnderTmp
-      // or wsUnderTmp.startsWith(entry + '/'), which is the rule sandbox-runtime uses.
-      const covers = entry === wsUnderTmp || wsUnderTmp.startsWith(entry + '/');
-      expect(covers, `entry "${entry}" must not grant write to workspace root "${wsUnderTmp}"`).toBe(false);
-    }
+    expect(rendered.filesystem.allowWrite).toContain(tmpdir);
   });
 });

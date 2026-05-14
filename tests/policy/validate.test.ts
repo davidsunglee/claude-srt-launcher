@@ -103,4 +103,63 @@ describe('validate', () => {
     };
     expect(() => validate(fragment, new Set())).not.toThrow();
   });
+
+  it('throws when allowWrite contains a path nested under a credential denyWrite root', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: baseDenyRead,
+        allowWrite: [path.join(home, '.ssh', 'srt', '.claude')],
+      },
+    };
+    let caught: unknown;
+    try {
+      validate(fragment, new Set());
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(PolicyValidationError);
+    const violations = (caught as PolicyValidationError).violations;
+    expect(
+      violations.some(v => v.toLowerCase().includes('allowwrite') && v.includes('.ssh')),
+    ).toBe(true);
+  });
+
+  it('throws when allowWrite contains a path nested under ~/.claude denyWrite root', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: baseDenyRead,
+        allowWrite: [path.join(home, '.claude', 'nested', 'state')],
+      },
+    };
+    let caught: unknown;
+    try {
+      validate(fragment, new Set());
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(PolicyValidationError);
+    const violations = (caught as PolicyValidationError).violations;
+    expect(
+      violations.some(v => v.toLowerCase().includes('allowwrite') && v.includes('.claude')),
+    ).toBe(true);
+  });
+
+  it('throws when a denyWrite path is nested inside an allowWrite root', () => {
+    const fragment: PolicyFragment = {
+      filesystem: {
+        denyRead: baseDenyRead,
+        denyWrite: [...baseDenyRead, path.join(home, 'project', '.ssh')],
+        allowWrite: [path.join(home, 'project')],
+      },
+    };
+    let caught: unknown;
+    try {
+      validate(fragment, new Set());
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeInstanceOf(PolicyValidationError);
+  });
 });

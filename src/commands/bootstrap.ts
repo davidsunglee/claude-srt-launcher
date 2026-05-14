@@ -32,8 +32,8 @@ export async function bootstrapCommand(parsed: ParsedCli): Promise<void> {
   }
 
   const stateDir = path.resolve(parsed.stateDir ?? resolveClaudeStateDir(parsed.profile));
-  await ensureClaudeStateDir(stateDir);
   assertNotHostClaudeHome(stateDir, parsed.unsafeOverrides as Set<string>);
+  await ensureClaudeStateDir(stateDir);
 
   const composed = compose([composeProfileFor(parsed), BOOTSTRAP_FRAGMENT]);
   const claudeState = resolveClaudeConfigDir(stateDir, parsed.unsafeOverrides);
