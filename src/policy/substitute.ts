@@ -46,6 +46,9 @@ export function substitute(fragment: PolicyFragment, subs: Substitutions): Polic
   if (fragment.enableWeakerNetworkIsolation !== undefined) {
     result.enableWeakerNetworkIsolation = fragment.enableWeakerNetworkIsolation;
   }
+  if (fragment.allowPty !== undefined) {
+    result.allowPty = fragment.allowPty;
+  }
 
   return result;
 }

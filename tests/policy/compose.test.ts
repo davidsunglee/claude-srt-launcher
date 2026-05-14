@@ -30,4 +30,13 @@ describe('compose', () => {
     const result = compose([a, b]);
     expect(result.network?.allowLocalBinding).toBe(false);
   });
+
+  it('composes top-level allowPty with the same later-defined boolean semantics', () => {
+    const a: PolicyFragment = { allowPty: true };
+    const b: PolicyFragment = {};
+    const c: PolicyFragment = { allowPty: false };
+
+    expect(compose([a, b]).allowPty).toBe(true);
+    expect(compose([a, c]).allowPty).toBe(false);
+  });
 });

@@ -44,6 +44,7 @@ describe('renderCommand', () => {
     expect(parsed).toHaveProperty('filesystem');
     expect(parsed).toHaveProperty('enableWeakerNestedSandbox');
     expect(parsed).toHaveProperty('enableWeakerNetworkIsolation');
+    expect(parsed).toHaveProperty('allowPty', true);
     expect(parsed.network.allowedDomains).toContain('github.com');
   });
 

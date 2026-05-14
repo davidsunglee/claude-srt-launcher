@@ -62,6 +62,7 @@ Run `pnpm smoke` (or `just smoke`) to execute the end-to-end smoke-test matrix i
 - workspace write + read inside the launched workspace
 - network egress to `api.github.com`
 - Claude Code service egress to `platform.claude.com`
+- terminal raw mode for TUI keyboard input
 - inspect profile: write under `<workspace>/test-output/` subdir
 
 **Deny checks (interactive profile):**

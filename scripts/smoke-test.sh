@@ -19,7 +19,8 @@
 #   PASS 10  inspect: test-output subdir   — inspect profile permits writes under $WS/test-output/
 #   DENY 10  inspect: workspace-root write — inspect profile blocks writes directly to $WS
 #   DENY 11  build: GitHub network          — build profile blocks api.github.com
-#   PASS 12  claude starts under wrapper    — claude --version works (or SKIP if not installed)
+#   PASS 12  terminal raw mode              — interactive TUIs can enable raw keyboard input
+#   PASS 13  claude starts under wrapper    — claude --version works (or SKIP if not installed)
 
 set -euo pipefail
 
@@ -269,6 +270,35 @@ if $CLI exec --profile build --workspace "$WS" --state-dir "$STATE" -- \
     fail "deny (build): api.github.com network"
 else
     pass "deny (build): api.github.com network"
+fi
+
+# ---------------------------------------------------------------------------
+# PASS check 12: terminal raw mode works under SRT
+# ---------------------------------------------------------------------------
+RAW_CHECK="$WS/raw-mode-check.js"
+cat > "$RAW_CHECK" <<'JS'
+if (!process.stdin.isTTY || !process.stdout.isTTY) {
+  process.exit(2);
+}
+process.stdin.setRawMode(true);
+process.stdin.resume();
+process.stdin.on('data', (buf) => {
+  if ([...buf].includes(113)) {
+    process.stdin.setRawMode(false);
+    process.exit(0);
+  }
+});
+setTimeout(() => process.exit(3), 2000);
+JS
+
+if command -v script >/dev/null; then
+    if printf '\033[Aq' | script -q "$WS/raw-mode.log" $CLI exec --profile interactive --workspace "$WS" --state-dir "$STATE" -- node "$RAW_CHECK" >/dev/null 2>&1; then
+        pass "terminal raw mode under wrapper"
+    else
+        fail "terminal raw mode under wrapper"
+    fi
+else
+    echo "SKIP: script command missing"
 fi
 
 # ---------------------------------------------------------------------------

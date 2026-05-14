@@ -21,6 +21,7 @@ export function toRendered(fragment: PolicyFragment): RenderedPolicy {
     },
     enableWeakerNestedSandbox: fragment.enableWeakerNestedSandbox ?? false,
     enableWeakerNetworkIsolation: fragment.enableWeakerNetworkIsolation ?? false,
+    allowPty: fragment.allowPty ?? false,
   };
 }
 

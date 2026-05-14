@@ -15,6 +15,7 @@ export interface RenderedPolicy {
   };
   enableWeakerNestedSandbox: boolean;
   enableWeakerNetworkIsolation: boolean;
+  allowPty: boolean;
 }
 
 export interface PolicyFragment {
@@ -34,6 +35,7 @@ export interface PolicyFragment {
   };
   enableWeakerNestedSandbox?: boolean;
   enableWeakerNetworkIsolation?: boolean;
+  allowPty?: boolean;
 }
 
 export type ProfileName = 'interactive' | 'build' | 'inspect' | 'ios';

@@ -25,4 +25,8 @@ describe('BASE_POLICY', () => {
   it('allows platform.claude.com for Claude Code service connections', () => {
     expect(BASE_POLICY.network?.allowedDomains?.includes('platform.claude.com')).toBe(true);
   });
+
+  it('allows pseudo-terminal operations for interactive TUIs', () => {
+    expect((BASE_POLICY as { allowPty?: boolean }).allowPty).toBe(true);
+  });
 });

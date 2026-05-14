@@ -54,6 +54,9 @@ export function compose(fragments: PolicyFragment[]): PolicyFragment {
       : acc.enableWeakerNetworkIsolation;
     if (wni !== undefined) result.enableWeakerNetworkIsolation = wni;
 
+    const allowPty = frag.allowPty !== undefined ? frag.allowPty : acc.allowPty;
+    if (allowPty !== undefined) result.allowPty = allowPty;
+
     return result;
   }, {});
 }

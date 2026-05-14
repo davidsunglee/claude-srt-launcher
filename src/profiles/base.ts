@@ -49,4 +49,5 @@ export const BASE_POLICY: PolicyFragment = {
   },
   enableWeakerNestedSandbox: false,
   enableWeakerNetworkIsolation: false,
+  allowPty: true,
 };
